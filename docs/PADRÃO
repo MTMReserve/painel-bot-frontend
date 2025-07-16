@@ -1,0 +1,119 @@
+📄 DOCUMENTO OFICIAL — PADRÃO DE EXECUÇÃO BACK-END painel-bot
+📌 OBJETIVO
+Estabelecer o padrão oficial, definitivo e estável para execução do back-end (src/server/) do projeto painel-bot, garantindo compatibilidade com:
+
+TypeScript moderno
+
+Módulo ESM (import/export)
+
+Execução via tsx sem build prévio
+
+Deploy em ambientes modernos (VPS, Railway, Vercel etc.)
+
+Front-end baseado em React/Vite (que já é ESM)
+
+✅ PADRÃO OFICIAL ESCOLHIDO
+📌 OPÇÃO 1 — Node.js 20 LTS + "type": "module" + tsx
+
+Essa arquitetura garante compatibilidade total entre front e back, execução moderna, e estabilidade em produção.
+
+🧱 COMPONENTES DO PADRÃO
+Item	Padrão adotado	Justificativa
+Node.js	v20.x LTS	Compatível com tsx, ESM, bibliotecas modernas, e com manutenção garantida
+Tipo de módulo	"type": "module"	Suporte a import/export no back-end
+Executor de dev	tsx	Executa .ts diretamente sem build prévio
+Scripts	"dev:api": "tsx --project tsconfig.server.json src/server/server.ts"	Execução clara e confiável do back-end
+Estrutura de projeto	src/client e src/server	Separação de front e back para monorepo limpo
+Gerenciador de versão	nvm	Troca rápida e segura de versões Node entre devs e produção
+
+🔄 COMO INSTALAR O AMBIENTE CORRETO
+1. Instalar o NVM (Windows):
+Baixe e instale a versão mais recente:
+👉 https://github.com/coreybutler/nvm-windows/releases
+
+2. Instalar o Node 20 LTS:
+bash
+Copiar
+Editar
+nvm install 20
+nvm use 20
+Verifique:
+
+bash
+Copiar
+Editar
+node -v     # deve retornar v20.x.x
+3. Instalar dependências:
+bash
+Copiar
+Editar
+npm install
+🚀 EXECUÇÃO EM DESENVOLVIMENTO
+Front-end:
+bash
+Copiar
+Editar
+npm run dev
+Back-end:
+bash
+Copiar
+Editar
+npm run dev:api
+Esse comando executa:
+
+bash
+Copiar
+Editar
+tsx --project tsconfig.server.json src/server/server.ts
+📦 BUILD DE PRODUÇÃO
+1. Compilar:
+bash
+Copiar
+Editar
+npx tsc --project tsconfig.server.json
+2. Executar:
+bash
+Copiar
+Editar
+node dist/server.js
+🛑 PROBLEMAS EVITADOS COM ESSE PADRÃO
+Problema resolvido	Como foi evitado
+bad option: --project	TSX instalado corretamente com Node 20
+Unknown file extension ".ts"	Node 20 aceita .ts com tsx
+ERR_MODULE_NOT_FOUND com @server/...	Pode ser tratado com tsconfig-paths opcional
+Conflito entre .cjs e "type": "module"	Eliminamos .cjs, padronizando com ESM e .ts
+Rodar código sem build manual	tsx permite execução direta em dev
+
+🧠 CONSIDERAÇÕES IMPORTANTES
+Node 22 não deve ser usado neste projeto até que suporte estável a ESM+TS seja garantido.
+
+Evite misturar "require" com "import"
+
+Sempre use extensões em imports quando estiver em "type": "module", como:
+
+ts
+Copiar
+Editar
+import { minhaFuncao } from "./meuModulo.js";
+📌 IMPORTANTE PARA MANUTENÇÃO FUTURA
+⚠️ Se no futuro o projeto quebrar com tsx, npx, node ou import/export, você deve retornar a este documento e confirmar:
+
+A versão ativa do Node (node -v)
+
+O tipo de módulo do package.json
+
+Se o tsx está instalado
+
+Se está usando nvm use 20
+
+✅ CHECKLIST DE CONFIGURAÇÃO ATUAL
+Item	Status esperado
+Node.js v20.x	✅ node -v = v20.x.x
+"type": "module"	✅ no package.json
+TSX instalado	✅ npx tsx --version funcionando
+Imports com extensão	✅ .js ou .ts explicito
+Sem .cjs ou require	✅ Código moderno e unificado
+
+🏁 FINAL
+Este documento define o padrão de execução oficial do projeto painel-bot.
+Todas as futuras decisões de build, execução, troubleshooting ou onboarding de devs devem seguir este padrão.
