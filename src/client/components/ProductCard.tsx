@@ -2,7 +2,7 @@
 // File: src/client/components/ProductCard.tsx
 // ==============================
 
-import type { Product } from "@/types/Product";
+import type { Product } from "@client/types/Product";
 
 interface ProductCardProps {
   product: Product;

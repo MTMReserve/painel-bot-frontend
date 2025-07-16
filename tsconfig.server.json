@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "baseUrl": "src/server",
+    "paths": {
+      "@server/*": ["*"]
+    },
+    "target": "ES2022",
+    "module": "ESNext",
+    "strict": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "typeRoots": ["./node_modules/@types", "./src/server/types"]
+  },
+  "include": ["src/server"]
+}

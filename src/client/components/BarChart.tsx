@@ -11,7 +11,7 @@ import {
   ResponsiveContainer,
   Cell,
 } from "recharts";
-import type { EtapaFunil } from "@/config/constants";
+import type { EtapaFunil } from "@client/config/constants";
 
 interface BarChartProps {
   data: { etapa: EtapaFunil; total: number }[];

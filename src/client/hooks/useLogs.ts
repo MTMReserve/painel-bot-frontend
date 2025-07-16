@@ -3,7 +3,7 @@
 //======================
 
 import { useQuery } from "@tanstack/react-query";
-import { api } from "@/services/api";
+import { api } from "@client/services/api";
 
 export function useLogs() {
   return useQuery({

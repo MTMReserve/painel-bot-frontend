@@ -27,8 +27,9 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    // Injeta tenant_id automaticamente nos params
-    if (tenant_id) {
+    // 🔒 Evita injetar tenant_id no login
+    const isLoginRequest = config.url?.match(/\/auth\/login$/);
+    if (!isLoginRequest && tenant_id) {
       if (!config.params) config.params = {};
       config.params.tenant_id = tenant_id;
     }

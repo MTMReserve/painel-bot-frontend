@@ -2,8 +2,8 @@
 // File: src/pages/Dashboard.tsx
 // ==============================================
 
-import { useFunnelStats } from "@/hooks/useFunnelStats";
-import { StatusCard } from "@/components/StatusCard";
+import { useFunnelStats } from "@client/hooks/useFunnelStats";
+import { StatusCard } from "@client/components/StatusCard";
 import {
   MessageCircle,
   UserPlus,
@@ -16,10 +16,10 @@ import {
   RefreshCcw,
   Slash
 } from "lucide-react";
-import type { EtapaFunil } from "@/config/constants";
+import type { EtapaFunil } from "@client/config/constants";
 import type { ReactNode } from "react";
-import { BarChart } from "@/components/BarChart";
-import { PieChart } from "@/components/PieChart";
+import { BarChart } from "@client/components/BarChart";
+import { PieChart } from "@client/components/PieChart";
 
 // Mapeamento visual das etapas
 const ETAPAS_LABELS: Record<EtapaFunil, string> = {

@@ -1,5 +1,5 @@
 // ===============================
-// File: src/types/Client.ts
+// File: src/client/types/Client.ts
 // ===============================
 
 /**
@@ -7,7 +7,7 @@
  * Representa tanto clientes listados quanto detalhes individuais.
  */
 
-import type { EtapaFunil } from "@/config/constants";
+import type { EtapaFunil } from "@client/config/constants";
 
 /**
  * Representa uma mensagem da conversa do cliente.
@@ -34,14 +34,22 @@ export interface Client {
 
   email?: string | null;
   necessidades?: string | null;
-  orcamento?: string | null;
-  forma_pagamento?: string | null;
 
-  /** Status operacional do cliente */
-  status?: "ativo" | "inativo" | null;
+  forma_pagamento?: string | null;
+  budget?: string | null;
+  negotiated_price?: string | null;
+
+  /** Status operacional do cliente (vindo do back-end) */
+  status?: "aberta" | "fechada" | "perdida" | null;
 
   /** Temperatura do lead para vendas */
   temperatura?: "quente" | "morno" | "frio" | null;
+
+  /** Tentativas de reentrada após encerramento */
+  retries?: number;
+
+  /** Flag que indica se a conversa foi finalizada */
+  conversa_finalizada?: boolean;
 
   /** Histórico de mensagens (se solicitado via /clients/:id) */
   mensagens?: Mensagem[];

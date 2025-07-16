@@ -25,9 +25,9 @@
     "noUncheckedSideEffectImports": true,
 
     /* 🔧 Alias para @/ */
-    "baseUrl": "./src/client",
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["*"]
+      "@client/*": ["src/client/*"]
     }
   },
   "include": ["vite-env.d.ts", "src/client"]

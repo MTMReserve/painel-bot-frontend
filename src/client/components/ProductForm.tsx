@@ -4,9 +4,9 @@
 //=======================================
 
 import { useState } from "react";
-import { useCreateProduct } from "@/hooks/useCreateProduct";
-import { useAuthStore } from "@/store/useAuthStore";
-import type { FormaPagamento, TipoEntrega } from "@/types/Product";
+import { useCreateProduct } from "@client/hooks/useCreateProduct";
+import { useAuthStore } from "@client/store/useAuthStore";
+import type { FormaPagamento, TipoEntrega } from "@client/types/Product";
 
 const FORMAS_PAGAMENTO: FormaPagamento[] = [
   "pix",

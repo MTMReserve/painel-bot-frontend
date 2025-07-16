@@ -2,12 +2,14 @@
 // File: src/server/controllers/clientsController.ts
 // ==============================================
 
-import { type Request, type Response } from "express";
+import { type Response, type RequestHandler } from "express";
 import { ClientRepository } from "../repositories/ClientRepository";
+import type { AuthenticatedRequest } from "../types/Express"; // ✅ NOVO
 
 // ✅ GET /clients — Lista todos com filtros
-export async function getClientsHandler(req: Request, res: Response) {
-  const { etapa, status, produto_id, tenant_id } = req.query;
+export const getClientsHandler: RequestHandler = async (req, res: Response) => {
+  const { etapa, status, produto_id } = req.query;
+  const tenant_id = (req as AuthenticatedRequest).tenant_id;
 
   if (!tenant_id || typeof tenant_id !== "string") {
     return res.status(400).json({ error: "tenant_id é obrigatório na query string" });
@@ -26,12 +28,12 @@ export async function getClientsHandler(req: Request, res: Response) {
     console.error("[GET /clients]", error);
     return res.status(500).json({ error: "Erro ao buscar clientes" });
   }
-}
+};
 
 // ✅ GET /clients/:id — Busca um cliente específico com mensagens
-export async function getClientByIdHandler(req: Request, res: Response) {
+export const getClientByIdHandler: RequestHandler = async (req, res: Response) => {
   const { id } = req.params;
-  const { tenant_id } = req.query;
+  const tenant_id = (req as AuthenticatedRequest).tenant_id;
 
   if (!tenant_id || typeof tenant_id !== "string") {
     return res.status(400).json({ error: "tenant_id é obrigatório na query string" });
@@ -44,9 +46,16 @@ export async function getClientByIdHandler(req: Request, res: Response) {
       return res.status(404).json({ error: "Cliente não encontrado" });
     }
 
-    return res.json(cliente);
+    // ✅ Mapeamento final para corresponder ao schema Zod
+    const resposta = {
+      ...cliente,
+      etapa: cliente.current_state,
+      criado_em: cliente.created_at?.toISOString?.() || cliente.created_at,
+    };
+
+    return res.json(resposta);
   } catch (error) {
     console.error(`[GET /clients/${id}]`, error);
     return res.status(500).json({ error: "Erro ao buscar cliente" });
   }
-}
+};

@@ -36,3 +36,7 @@ export const BACK_ENV = {
   DB_PASSWORD: getEnv("DB_PASSWORD", ""),
   DB_NAME: getEnv("DB_NAME", "bot_whatsapp"),
 };
+
+// ✅ Variáveis do Google OAuth
+export const GOOGLE_CLIENT_ID = getEnv("GOOGLE_CLIENT_ID");
+export const GOOGLE_CLIENT_SECRET = getEnv("GOOGLE_CLIENT_SECRET");

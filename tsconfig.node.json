@@ -10,7 +10,13 @@
     "outDir": "dist",
     "types": ["node"],
     "composite": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+
+    /* 🔧 Alias para scripts Node usando o back-end */
+    "baseUrl": ".",
+    "paths": {
+      "@server/*": ["src/server/*"]
+    }
   },
   "include": ["src/server"],
   "exclude": ["node_modules", "**/*.test.ts", "**/*.spec.ts"]

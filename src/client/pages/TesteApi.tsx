@@ -3,7 +3,7 @@
 //========================
 
 import { useEffect, useState } from "react";
-import { api } from "@/services/api";
+import { api } from "@client/services/api";
 
 export default function TesteApi() {
   const [mensagem, setMensagem] = useState("Carregando...");

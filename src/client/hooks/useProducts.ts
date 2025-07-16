@@ -3,9 +3,9 @@
 // ============================
 
 import { useQuery } from "@tanstack/react-query";
-import { api } from "@/services/api";
-import { useAuthStore } from "@/store/useAuthStore";
-import type { Product } from "@/types/Product";
+import { api } from "@client/services/api";
+import { useAuthStore } from "@client/store/useAuthStore";
+import type { Product } from "@client/types/Product";
 
 /**
  * Hook para buscar produtos cadastrados no sistema.

@@ -2,11 +2,10 @@
 //src/components/FilterSidebar.tsx
 //=================================
 
-import { useFilterStore } from "@/store/useFilterStore";
-import { ETAPAS_FUNIL, STATUS_CLIENTE } from "@/config/constants";
-import { useProducts } from "@/hooks/useProducts";
-import type { Product } from "@/types/Product";
-
+import { useClientFilters } from "@client/store/useClientFilters";
+import { ETAPAS_FUNIL, STATUS_CLIENTE } from "@client/config/constants";
+import { useProducts } from "@client/hooks/useProducts";
+import type { Product } from "@client/types/Product";
 
 export function FilterSidebar() {
   const { data: produtos } = useProducts();
@@ -18,8 +17,7 @@ export function FilterSidebar() {
     setEtapa,
     setStatus,
     setProdutoId,
-    resetFilters,
-  } = useFilterStore();
+  } = useClientFilters();
 
   return (
     <aside className="bg-white rounded-xl shadow p-4 w-full max-w-xs">
@@ -65,7 +63,7 @@ export function FilterSidebar() {
       </label>
       <select
         value={produtoId ?? ""}
-        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setProdutoId(e.target.value || null)}
+        onChange={(e) => setProdutoId(e.target.value || null)}
         className="w-full border p-2 rounded mb-4"
       >
         <option value="">Todos</option>
@@ -77,7 +75,11 @@ export function FilterSidebar() {
       </select>
 
       <button
-        onClick={resetFilters}
+        onClick={() => {
+          setEtapa(null);
+          setStatus(null);
+          setProdutoId(null);
+        }}
         className="w-full mt-2 text-sm text-gray-500 underline hover:text-gray-700"
       >
         Limpar filtros

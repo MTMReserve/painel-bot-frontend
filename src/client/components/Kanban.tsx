@@ -2,12 +2,12 @@
 // File: src/client/components/Kanban.tsx
 // ============================
 
-import { useClients } from "@/hooks/useClients";
+import { useClients } from "@client/hooks/useClients";
 import { useEffect } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import type { DropResult } from "@hello-pangea/dnd";
-import { useClientFilters } from "@/store/useClientFilters";
-import { StatusChip } from "@/components/StatusChip";
+import { useClientFilters } from "@client/store/useClientFilters";
+import { StatusChip } from "@client/components/StatusChip";
 import { Link } from "react-router-dom";
 
 export function Kanban() {

@@ -2,8 +2,8 @@
 // File: src/client/pages/ProductsPage.tsx
 // ==============================
 
-import { useProducts } from "@/hooks/useProducts";
-import { ProductCard } from "@/components/ProductCard";
+import { useProducts } from "@client/hooks/useProducts";
+import { ProductCard } from "@client/components/ProductCard";
 
 export default function ProductsPage() {
   const { data, isLoading, isError } = useProducts();

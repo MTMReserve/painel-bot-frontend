@@ -3,8 +3,8 @@
   //==============================
 
 import { useQuery } from "@tanstack/react-query";
-import { api } from "@/services/api";
-import { useAuthStore } from "@/store/useAuthStore";
+import { api } from "@client/services/api";
+import { useAuthStore } from "@client/store/useAuthStore";
 
 export function useFunnelStats() {
   const tenant_id = useAuthStore((s) => s.tenant_id);

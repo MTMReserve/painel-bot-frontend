@@ -3,8 +3,8 @@
 // ===============================
 
 import { useMutation } from "@tanstack/react-query";
-import { api } from "@/services/api";
-import type { Product } from "@/types/Product";
+import { api } from "@client/services/api";
+import type { Product } from "@client/types/Product";
 
 type CreateProductInput = Omit<Product, "id" | "created_at" | "updated_at"> & {
   tenant_id: string;

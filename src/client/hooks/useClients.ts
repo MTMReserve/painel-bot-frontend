@@ -3,10 +3,10 @@
 // ===============================
 
 import { useQuery } from "@tanstack/react-query";
-import { api } from "@/services/api";
-import { useAuthStore } from "@/store/useAuthStore";
-import { useClientFilters } from "@/store/useClientFilters"; // 👈 integrando Zustand
-import type { Client } from "@/types/Client";
+import { api } from "@client/services/api";
+import { useAuthStore } from "@client/store/useAuthStore";
+import { useClientFilters } from "@client/store/useClientFilters"; // 👈 integrando Zustand
+import type { Client } from "@client/types/Client";
 
 /**
  * Hook para buscar clientes com base nos filtros globais.

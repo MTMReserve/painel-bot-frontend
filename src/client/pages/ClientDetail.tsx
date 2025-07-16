@@ -4,17 +4,21 @@
 
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { api } from "@/services/api";
-import { useAuthStore } from "@/store/useAuthStore";
-import type { Client } from "@/types/Client";
+import { api } from "@client/services/api";
+import { useAuthStore } from "@client/store/useAuthStore";
+import type { ClientResponse } from "@client/types/ClientResponse";
+import { clientResponseSchema } from "@client/validators/getClientSchema";
 import { ArrowLeft } from "lucide-react";
+import type { EtapaFunil } from "@client/config/constants";
+
+// import type { EtapaFunil } from "@client/types/EtapaFunil"; // se necessário
 
 export default function ClientDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const tenant_id = useAuthStore((s) => s.tenant_id);
 
-  const [cliente, setCliente] = useState<Client | null>(null);
+  const [cliente, setCliente] = useState<ClientResponse | null>(null);
   const [erro, setErro] = useState<string | null>(null);
 
   useEffect(() => {
@@ -24,7 +28,23 @@ export default function ClientDetail() {
       .get(`/clients/${id}`, {
         params: { tenant_id },
       })
-      .then((res) => setCliente(res.data))
+      .then((res) => {
+        try {
+          const parsed = clientResponseSchema.parse(res.data);
+          setCliente({
+            ...parsed,
+            current_state: parsed.current_state as EtapaFunil | null,
+            budget: parsed.budget != null ? String(parsed.budget) : null,
+            negotiated_price: parsed.negotiated_price != null ? String(parsed.negotiated_price) : null,
+            status: ["aberta", "fechada", "perdida"].includes(parsed.status ?? "")
+              ? (parsed.status as "aberta" | "fechada" | "perdida")
+              : null,
+          });
+        } catch (validationError) {
+          console.error("❌ Erro de validação na resposta da API:", validationError);
+          setErro("Erro ao validar dados do cliente.");
+        }
+      })
       .catch((err) => {
         console.error("Erro ao buscar cliente:", err);
         setErro("Erro ao buscar cliente.");
@@ -46,7 +66,6 @@ export default function ClientDetail() {
       <h1 className="text-3xl font-bold text-green-700 mb-4">Detalhes do Cliente</h1>
 
       {erro && <p className="text-red-500">{erro}</p>}
-
       {!cliente && !erro && <p className="text-gray-500">Carregando cliente...</p>}
 
       {cliente && (
@@ -58,6 +77,19 @@ export default function ClientDetail() {
               <p><strong>Telefone:</strong> {cliente.phone}</p>
               {cliente.email && <p><strong>Email:</strong> {cliente.email}</p>}
               {cliente.produto_id && <p><strong>Produto:</strong> {cliente.produto_id}</p>}
+            </div>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold">Dados Avançados</h2>
+            <div className="mt-2 text-gray-800 space-y-1">
+              <p><strong>Forma de Pagamento:</strong> {cliente.forma_pagamento || "Não informado"}</p>
+              <p><strong>Orçamento:</strong> {cliente.budget || "N/A"}</p>
+              <p><strong>Preço Negociado:</strong> {cliente.negotiated_price || "N/A"}</p>
+              <p><strong>Status:</strong> {cliente.status || "N/A"}</p>
+              <p><strong>Temperatura:</strong> {cliente.temperatura || "N/A"}</p>
+              <p><strong>Tentativas:</strong> {cliente.retries ?? "0"}</p>
+              <p><strong>Conversa Finalizada:</strong> {cliente.conversa_finalizada ? "Sim" : "Não"}</p>
             </div>
           </section>
 
