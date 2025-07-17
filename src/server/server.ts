@@ -9,7 +9,6 @@ import { clientsRouter } from "./routes/clients.routes";
 import  authRouter from "./routes/auth.routes";
 import { tenantRouter } from "./routes/tenant.routes";  
 import { BACK_ENV } from "./config/env.server";
-import passport from "./services/GoogleAuthService";
 import session from "cookie-session";
 
 
@@ -24,9 +23,6 @@ app.use(
     maxAge: 24 * 60 * 60 * 1000,
   })
 );
-
-app.use(passport.initialize());
-app.use(passport.session());
 
 
 // ✅ Registro dos routers

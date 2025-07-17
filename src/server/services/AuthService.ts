@@ -8,7 +8,9 @@ import {
   findTenantById,
   findTenantByEmail,
   findTenantByTelefone,
-  createTenant
+  findTenantByGoogleId,
+  createTenant,
+  createTenantFromGoogle,
 } from "../repositories/TenantRepo";
 import type { LoginRequest, SafeTenant } from "../models/Tenant";
 
@@ -68,43 +70,28 @@ export async function registrarTenant(data: {
   };
 }
 
-// 🔁 Login com conta Google OAuth
-export async function loginViaGoogle(code: string): Promise<SafeTenant> {
-  const clientId = process.env.GOOGLE_CLIENT_ID;
-  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  const redirectUri = `${process.env.API_BASE_URL}/auth/google/callback`;
+// ✅ Login com Google Credential JWT direto do front (via botão GoogleLogin)
+export async function loginViaGoogleCredential(credential: string): Promise<SafeTenant> {
+  const tokeninfoUrl = `https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`;
+  const { data } = await axios.get(tokeninfoUrl);
 
-  const tokenResp = await axios.post("https://oauth2.googleapis.com/token", null, {
-    params: {
-      code,
-      client_id: clientId,
-      client_secret: clientSecret,
-      redirect_uri: redirectUri,
-      grant_type: "authorization_code"
-    },
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded"
-    }
-  });
+  const google_id = data.sub;
+  const email = data.email;
+  const nome = data.name || email.split("@")[0];
+  const logo_url = data.picture || undefined;
 
-  const { id_token } = tokenResp.data;
+  if (!google_id || !email) {
+    throw { status: 400, message: "Credenciais do Google inválidas" };
+  }
 
-  const userInfoResp = await axios.get(`https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=${id_token}`);
-  const email = userInfoResp.data.email;
-  const nome = userInfoResp.data.name || email.split("@")[0];
-
-  const tenantId = email.split("@")[0].replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
-
-  let tenant = await findTenantById(tenantId);
+  let tenant = await findTenantByGoogleId(google_id);
 
   if (!tenant) {
-    const senhaAleatoria = Math.random().toString(36).slice(-8);
-    const senha_hash = await bcrypt.hash(senhaAleatoria, 10);
-
-    tenant = await createTenant({
-      tenant_id: tenantId,
+    tenant = await createTenantFromGoogle({
+      google_id,
       nome_empresa: nome,
-      senha_hash
+      email,
+      logo_url
     });
   }
 
@@ -112,6 +99,9 @@ export async function loginViaGoogle(code: string): Promise<SafeTenant> {
     tenant_id: tenant.tenant_id,
     nome_empresa: tenant.nome_empresa,
     logo_url: tenant.logo_url || undefined,
+    plano: tenant.plano,
+    termo_versao: tenant.termo_versao,
+    aceitou_termos_em: tenant.aceitou_termos_em,
     token: tenant.tenant_id
   };
 }

@@ -3,7 +3,7 @@
 // ===============================
 
 import { Request, Response } from "express";
-import { autenticarTenant, registrarTenant } from "../services/AuthService";
+import { autenticarTenant, registrarTenant, loginViaGoogleCredential } from "../services/AuthService";
 import { enviarEmailRecuperacao } from "../services/recuperacaoService";
 import type { LoginRequest } from "../models/Tenant";
 
@@ -27,6 +27,29 @@ export async function loginHandler(req: Request, res: Response): Promise<Respons
 
     console.error("Erro inesperado:", error);
     return res.status(500).json({ error: "Erro interno no servidor" });
+  }
+}
+
+// ✅ Login com Google Credential — POST /auth/google
+export async function googleLoginHandler(req: Request, res: Response): Promise<Response> {
+  try {
+    const { credential } = req.body;
+
+    if (!credential) {
+      return res.status(400).json({ error: "Credencial JWT do Google não fornecida" });
+    }
+
+    const tenant = await loginViaGoogleCredential(credential);
+    return res.json(tenant);
+  } catch (error: unknown) {
+    if (typeof error === "object" && error !== null && "status" in error && "message" in error) {
+      return res.status((error as { status: number }).status).json({
+        error: (error as { message: string }).message,
+      });
+    }
+
+    console.error("Erro inesperado no login Google:", error);
+    return res.status(500).json({ error: "Erro interno no login com Google" });
   }
 }
 

@@ -1212,3 +1212,63 @@ Google OAuth
 
 A refatoração respeitou o padrão arquitetural do projeto, isolando responsabilidades entre Model → Repo → Service → Controller. As modificações são compatíveis com a expansão futura para login por Facebook, redefinição de senha e logs de auditoria.
 
+=========================
+
+✅ CHANGELOG — Login com Google via JWT
+Versão: v1.3.0
+Data: 17/07/2025
+Responsável: Maurício Freitas
+Objetivo: Adicionar suporte completo ao login com conta Google via JWT (Google One Tap ou <GoogleLogin />), com fallback para criação automática de empresa.
+
+🆕 Funcionalidade Implementada
+Login com Google usando JWT (credential) do botão oficial:
+
+Front envia credential via POST /auth/google
+
+Back-end verifica JWT no Google
+
+Se empresa (tenant) já existir → realiza login
+
+Se não existir → cria automaticamente com base em google_id, email, nome e foto
+
+Fluxo seguro, sem uso de passport
+
+🗂️ Arquivos modificados
+src/server/services/AuthService.ts
+🔁 Refatorada a função loginViaGoogleCredential()
+
+Uso de google_id como identificador
+
+Consulta tokeninfo via Google
+
+Criação automática de empresa com createTenantFromGoogle(...)
+
+Remoção da senha aleatória (desnecessária no login Google)
+
+src/server/controllers/authController.ts
+✅ Função googleLoginHandler implementada
+
+Valida presença do credential
+
+Chama loginViaGoogleCredential(...) e retorna SafeTenant
+
+src/server/repositories/TenantRepo.ts
+➕ Adicionadas funções:
+
+findTenantByGoogleId(google_id)
+
+createTenantFromGoogle({ google_id, email, nome_empresa, logo_url })
+
+src/server/routes/auth.routes.ts
+✅ Nova rota POST /auth/google adicionada
+
+src/client/main.tsx
+✅ App agora envolvido com <GoogleOAuthProvider /> usando VITE_GOOGLE_CLIENT_ID
+
+✅ Banco de Dados
+Tabela tenants agora suporta:
+
+google_id (usado como identificador único para login Google)
+
+email, logo_url (usados ao criar novo tenant automaticamente)
+
