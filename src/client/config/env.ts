@@ -1,5 +1,5 @@
 //===================
-// src/config/env.ts
+// src/client/config/env.ts
 // ==================
 
 export const env = {

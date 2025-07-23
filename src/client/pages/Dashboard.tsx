@@ -20,6 +20,8 @@ import type { EtapaFunil } from "@client/config/constants";
 import type { ReactNode } from "react";
 import { BarChart } from "@client/components/BarChart";
 import { PieChart } from "@client/components/PieChart";
+import { ProfileMenu } from "@client/components/ProfileMenu";
+
 
 // Mapeamento visual das etapas
 const ETAPAS_LABELS: Record<EtapaFunil, string> = {
@@ -71,6 +73,7 @@ export default function Dashboard() {
 
   return (
     <div className="p-6">
+      <ProfileMenu />
       <h1 className="text-3xl font-bold text-gray-800 mb-6">Dashboard</h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">

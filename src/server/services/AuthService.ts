@@ -17,16 +17,14 @@ import type { LoginRequest, SafeTenant } from "../models/Tenant";
 export async function autenticarTenant(login: LoginRequest): Promise<SafeTenant> {
   const { identificador, senha } = login;
 
-  let tenant = null;
+  // Tenta localizar o tenant por telefone, email ou tenant_id
+  const [porTelefone, porEmail, porTenantId] = await Promise.all([
+    findTenantByTelefone(identificador),
+    findTenantByEmail(identificador),
+    findTenantById(identificador)
+  ]);
 
-  // Detectar tipo de identificador
-  if (/^\+?\d{10,15}$/.test(identificador)) {
-    tenant = await findTenantByTelefone(identificador);
-  } else if (/^[\w-.]+@[\w-]+\.[\w-.]+$/.test(identificador)) {
-    tenant = await findTenantByEmail(identificador);
-  } else {
-    tenant = await findTenantById(identificador);
-  }
+  const tenant = porTelefone || porEmail || porTenantId;
 
   if (!tenant) {
     throw { status: 404, message: "Empresa não encontrada" };
@@ -41,6 +39,9 @@ export async function autenticarTenant(login: LoginRequest): Promise<SafeTenant>
     tenant_id: tenant.tenant_id,
     nome_empresa: tenant.nome_empresa,
     logo_url: tenant.logo_url || undefined,
+    plano: tenant.plano,
+    termo_versao: tenant.termo_versao,
+    aceitou_termos_em: tenant.aceitou_termos_em,
     token: tenant.tenant_id
   };
 }

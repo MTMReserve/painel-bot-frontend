@@ -10,6 +10,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "listar-rotas": "ts-node --esm src/server/listarRotas.ts",
     "lint:css-unused": "ts-node --project tsconfig.scripts.json scripts/lint-unused-css.cts"
   },
   "dependencies": {
@@ -21,6 +22,7 @@
     "classnames": "^2.5.1",
     "cookie-session": "^2.1.0",
     "cors": "^2.8.5",
+    "date-fns": "^4.1.0",
     "dotenv": "^17.2.0",
     "express": "^5.1.0",
     "google-auth-library": "^10.1.0",
@@ -32,6 +34,7 @@
     "passport-google-oauth20": "^2.0.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-input-mask": "^2.0.4",
     "react-markdown": "^10.1.0",
     "react-router-dom": "^7.6.3",
     "recharts": "^3.1.0",

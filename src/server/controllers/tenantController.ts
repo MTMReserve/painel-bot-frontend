@@ -1,19 +1,34 @@
-// ===========================================
-// File: src/server/controllers/tenantController.ts
-// ===========================================
-
 import { type RequestHandler } from "express";
-import { getTenantProfile, updatePlano, getTermoAtual, registrarAceite } from "../services/tenantService";
+import {
+  getTenantProfile,
+  updatePlano,
+  getTermoAtual,
+  registrarAceite,
+  updateNomeEmpresa
+} from "../services/tenantService";
 import type { AuthenticatedRequest } from "../types/Express";
 
-// GET /tenant/me
+// ✅ GET /tenant/me — retorna perfil completo
 export const getTenantProfileHandler: RequestHandler = async (req, res) => {
   const { tenant_id } = req as AuthenticatedRequest;
   const perfil = await getTenantProfile(tenant_id);
   return res.json(perfil);
 };
 
-// PUT /tenant/me (atualiza apenas o plano)
+// ✅ PUT /tenant/me — atualiza apenas o nome da empresa (novo)
+export const updateTenantProfileHandler: RequestHandler = async (req, res) => {
+  const { tenant_id } = req as AuthenticatedRequest;
+  const { nome_empresa } = req.body;
+
+  if (!nome_empresa || typeof nome_empresa !== "string" || nome_empresa.trim().length < 2) {
+    return res.status(400).json({ error: "Nome da empresa inválido" });
+  }
+
+  await updateNomeEmpresa(tenant_id, nome_empresa.trim());
+  return res.status(204).send();
+};
+
+// ✅ PUT /tenant/plano — troca o plano
 export const updatePlanoHandler: RequestHandler = async (req, res) => {
   const { tenant_id } = req as AuthenticatedRequest;
   const { plano } = req.body;
@@ -24,13 +39,13 @@ export const updatePlanoHandler: RequestHandler = async (req, res) => {
   return res.status(204).send();
 };
 
-// GET /tenant/termos
+// ✅ GET /tenant/termos — retorna o termo atual
 export const getTermoAtualHandler: RequestHandler = async (_req, res) => {
   const termo = await getTermoAtual();
   return res.json(termo);
 };
 
-// POST /tenant/aceite
+// ✅ POST /tenant/aceite — registra aceite do contrato
 export const registrarAceiteHandler: RequestHandler = async (req, res) => {
   const { tenant_id } = req as AuthenticatedRequest;
   const { versao } = req.body;

@@ -6,6 +6,7 @@ import { Request, Response } from "express";
 import { autenticarTenant, registrarTenant, loginViaGoogleCredential } from "../services/AuthService";
 import { enviarEmailRecuperacao } from "../services/recuperacaoService";
 import type { LoginRequest } from "../models/Tenant";
+import { pool } from "../utils/db"; // ✅ Import necessário
 
 // ✅ Login — POST /auth/login
 export async function loginHandler(req: Request, res: Response): Promise<Response> {
@@ -102,5 +103,62 @@ export async function recuperarSenhaHandler(req: Request, res: Response) {
 
     console.error("Erro inesperado ao recuperar senha:", error);
     return res.status(500).json({ error: "Erro interno ao recuperar senha" });
+  }
+}
+
+// ✅ Verificar disponibilidade de tenant_id — GET /auth/check-tenant-id
+export async function checkTenantIdAvailability(req: Request, res: Response) {
+  const { tenant_id } = req.query;
+
+  if (!tenant_id || typeof tenant_id !== "string") {
+    return res.status(400).json({ error: "Parâmetro tenant_id é obrigatório" });
+  }
+
+  try {
+    const [rows] = await pool.query(
+      "SELECT COUNT(*) as total FROM tenants WHERE tenant_id = ?",
+      [tenant_id]
+    );
+
+    const count = (rows as { total: number }[])[0].total;
+
+    return res.status(200).json({ available: count === 0 });
+  } catch (err) {
+    console.error("Erro ao verificar tenant_id:", err);
+    return res.status(500).json({ error: "Erro interno ao verificar tenant_id" });
+  }
+}
+
+// ✅ Verificar existência de dados — POST /auth/verificar-existencia
+export async function verificarExistenciaHandler(req: Request, res: Response) {
+  const { cpf, email, telefone, tenant_id } = req.body;
+
+  const resultados: Record<string, boolean> = {};
+
+  try {
+    if (cpf) {
+      const [rows] = await pool.query("SELECT id FROM tenants WHERE cpf = ? LIMIT 1", [cpf]);
+      resultados.cpf = Array.isArray(rows) && rows.length > 0;
+    }
+
+    if (email) {
+      const [rows] = await pool.query("SELECT id FROM tenants WHERE email = ? LIMIT 1", [email]);
+      resultados.email = Array.isArray(rows) && rows.length > 0;
+    }
+
+    if (telefone) {
+      const [rows] = await pool.query("SELECT id FROM tenants WHERE telefone = ? LIMIT 1", [telefone]);
+      resultados.telefone = Array.isArray(rows) && rows.length > 0;
+    }
+
+    if (tenant_id) {
+      const [rows] = await pool.query("SELECT id FROM tenants WHERE tenant_id = ? LIMIT 1", [tenant_id]);
+      resultados.tenant_id = Array.isArray(rows) && rows.length > 0;
+    }
+
+    return res.json(resultados);
+  } catch (error) {
+    console.error("Erro ao verificar existência:", error);
+    return res.status(500).json({ error: "Erro interno ao verificar existência." });
   }
 }

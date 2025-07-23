@@ -5,9 +5,17 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../services/api";
 
+// Interface com todos os campos que podem ser enviados
 interface UpdateTenantData {
   nome_empresa: string;
-  plano: string;
+  logo_url?: string;
+  cep: string;
+  numero: string;
+  complemento?: string;
+  logradouro: string;
+  bairro?: string;
+  cidade: string;
+  estado: string;
 }
 
 export function useUpdateTenant() {
@@ -19,7 +27,6 @@ export function useUpdateTenant() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tenantProfile"] });
-
     }
   });
 

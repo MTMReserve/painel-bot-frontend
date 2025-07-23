@@ -1,5 +1,5 @@
 //============================
-//src/client/pages/Login.tsx
+// File: src/client/pages/Login.tsx
 //============================
 
 import { useState } from 'react';
@@ -10,10 +10,10 @@ import axios from 'axios';
 import { GoogleLogin } from '@react-oauth/google';
 import type { CredentialResponse } from '@react-oauth/google';
 
-
 export default function Login() {
   const [tenantId, setTenantId] = useState('');
   const [senha, setSenha] = useState('');
+  const [mostrarSenha, setMostrarSenha] = useState(false); // 👈 Novo estado
   const [erro, setErro] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -58,7 +58,6 @@ export default function Login() {
   };
 
   const handleGoogleLoginSuccess = async (credentialResponse: CredentialResponse) => {
-
     try {
       const { credential } = credentialResponse;
 
@@ -93,14 +92,24 @@ export default function Login() {
           className="w-full p-2 border rounded mb-4"
         />
 
-        <input
-          type="password"
-          value={senha}
-          onChange={(e) => setSenha(e.target.value)}
-          placeholder="Senha"
-          className="w-full p-2 border rounded mb-4"
-          onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-        />
+        {/* Campo de senha com botão de mostrar/ocultar */}
+        <div className="relative mb-4">
+          <input
+            type={mostrarSenha ? "text" : "password"}
+            value={senha}
+            onChange={(e) => setSenha(e.target.value)}
+            placeholder="Senha"
+            className="w-full p-2 border rounded pr-10"
+            onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+          />
+          <button
+            type="button"
+            onClick={() => setMostrarSenha(!mostrarSenha)}
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-600"
+          >
+            {mostrarSenha ? "🙈" : "👁"}
+          </button>
+        </div>
 
         {erro && <p className="text-red-600 text-sm mb-2">{erro}</p>}
 
@@ -119,7 +128,6 @@ export default function Login() {
           <GoogleLogin
             onSuccess={handleGoogleLoginSuccess}
             onError={() => setErro('Erro ao autenticar com o Google')}
-            useOneTap
           />
         </div>
 

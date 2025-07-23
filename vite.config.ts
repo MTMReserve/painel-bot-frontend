@@ -13,5 +13,13 @@ export default defineConfig({
       '@client': path.resolve(__dirname, 'src/client'),
     },
   },
+    server: {
+    proxy: {
+      '/auth': {
+        target: 'http://localhost:3001', //API backend
+        changeOrigin: true,
+      },
+    },
+  },
 });
 

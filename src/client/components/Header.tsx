@@ -3,15 +3,10 @@
 // ==========================
 
 import { useTenantStore } from "../store/useTenantStore";
+import { ProfileMenu } from "./ProfileMenu";
 
 export default function Header() {
-  const { tenant, clearTenant } = useTenantStore();
-
-  function handleLogout() {
-    clearTenant();
-    localStorage.clear();
-    location.href = "/login";
-  }
+  const { tenant } = useTenantStore();
 
   return (
     <header className="bg-white shadow p-4 flex items-center justify-between">
@@ -31,7 +26,7 @@ export default function Header() {
         </h1>
       </div>
 
-      {/* Lado direito: plano + versão + logout */}
+      {/* Lado direito: plano + versão + menu de perfil */}
       <div className="flex items-center gap-4">
         {tenant?.plano && (
           <span className="text-sm bg-green-100 text-green-800 px-3 py-1 rounded font-medium">
@@ -45,12 +40,8 @@ export default function Header() {
           </span>
         )}
 
-        <button
-          onClick={handleLogout}
-          className="text-sm text-red-600 border border-red-500 hover:bg-red-50 px-3 py-1 rounded"
-        >
-          Sair
-        </button>
+        {/* Novo menu de perfil com logout, cadastro, produtos, contrato */}
+        <ProfileMenu />
       </div>
     </header>
   );

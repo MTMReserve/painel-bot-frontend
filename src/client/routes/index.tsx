@@ -20,6 +20,7 @@ import TenantProfile from "@client/pages/TenantProfile";
 import Contrato from "@client/pages/Contrato";
 import LoginCallback from "../pages/LoginCallback";
 import LoginError from "../pages/LoginError";
+import Termos from "../pages/Termos";
 
 export default function AppRoutes() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated());
@@ -70,6 +71,10 @@ export default function AppRoutes() {
             </PublicOnlyRoute>
           }
         />
+
+        {/* ✅ Rota pública dos Termos de Serviço */}
+        <Route path="/termos" element={<Termos />} />
+
         {/* Rotas protegidas */}
         <Route
           element={
