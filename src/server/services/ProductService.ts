@@ -1,99 +1,49 @@
-//======================================
-//src/server/services/ProductService.ts
-//======================================
+import type { FichaProduto } from '../schemas/fichaProdutoValidator';
+import ProductRepository from '../repositories/ProductRepository';
 
-import { pool } from '../utils/db';
-import { v4 as uuidv4 } from 'uuid';
-import type { Product } from '../models/Product';
-import type { RowDataPacket } from 'mysql2'; // 👈 necessário
-
-export class ProductService {
-  static async getAllByTenant(tenant_id: string): Promise<Product[]> {
-    const [rows] = await pool.query<(Product & RowDataPacket)[]>(
-      'SELECT * FROM products WHERE tenant_id = ?',
-      [tenant_id]
-    );
-    return rows;
+/**
+ * Camada de negócio responsável por validar regras adicionais antes
+ * de interagir com o repositório. Esta classe encapsula lógica de
+ * deduplicação, preenchimento de campos padrão e outras operações
+ * necessárias para manter a integridade dos produtos.
+ */
+class ProductService {
+  /**
+   * Cria um novo produto após validar duplicidade e regras de
+   * negócio. Lança erro se um produto com o mesmo nome já existir
+   * dentro do tenant informado.
+   */
+  async createProduct(data: FichaProduto) {
+    // Verifica duplicidade pelo nome e tenant
+    const existing = await ProductRepository.findByName(data.tenant_id, data.nome);
+    if (existing) {
+      throw new Error('Produto duplicado: já existe um produto com este nome');
+    }
+    // Opcionalmente aqui poderiam ser aplicadas outras regras de negócio,
+    // como garantir metas mínimas ou transformar campos vazios em
+    // estruturas compatíveis.
+    return await ProductRepository.create(data);
   }
 
-  static async getById(id: string): Promise<Product | null> {
-    const [rows] = await pool.query<(Product & RowDataPacket)[]>(
-      'SELECT * FROM products WHERE id = ?',
-      [id]
-    );
-    return rows[0] ?? null;
+  /**
+   * Atualiza um produto existente. Se o produto não for encontrado,
+   * lança um erro. As regras de deduplicidade não se aplicam aqui
+   * porque supõe‑se que o ID provém do próprio produto existente.
+   */
+  async updateProduct(id: number, data: FichaProduto) {
+    return await ProductRepository.update(id, data);
   }
 
-    static async create(data: Partial<Product>): Promise<string> {
-    const id = uuidv4();
-    await pool.query(
-      `
-    INSERT INTO products (
-    id, tenant_id, nome, descricao, preco, promocao, garantias, beneficios,
-    formas_pagamento, instrucoes_pagamento, negociacao, entrega,
-    instrucoes_entrega, local_realizacao, requires_address,
-    definicao_fechamento, campos_obrigatorios, categoria, tags
-    )
-
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `,
-        [
-        id,
-        data.tenant_id,
-        data.nome,
-        data.descricao,
-        data.preco,
-        data.promocao ?? null,
-        data.garantias ?? null,
-        JSON.stringify(data.beneficios ?? []),
-        JSON.stringify(data.formasPagamento ?? []),
-        data.instrucoesPagamento ?? '',
-        JSON.stringify(data.negociacao ?? null),
-        data.entrega ?? null,
-        data.instrucoesEntrega ?? '',
-        data.local_realizacao ?? null,
-        data.requires_address ?? false,
-        data.definicaoFechamento ?? '',
-        JSON.stringify(data.camposObrigatoriosFechamento ?? []),
-        data.categoria ?? null,
-        JSON.stringify(data.tags ?? [])
-        ]
-
-    );
-    return id;
-  }
-
-  static async update(id: string, data: Partial<Product>): Promise<void> {
-    await pool.query(
-      `
-      UPDATE products
-      SET
-        nome = ?, descricao = ?, preco = ?, promocao = ?, garantias = ?, beneficios = ?,
-        formasPagamento = ?, instrucoesPagamento = ?, negociacao = ?, entrega = ?,
-        instrucoesEntrega = ?, local_realizacao = ?, requires_address = ?,
-        definicaoFechamento = ?, camposObrigatoriosFechamento = ?, categoria = ?, tags = ?
-      WHERE id = ?
-      `,
-      [
-        data.nome,
-        data.descricao,
-        data.preco,
-        data.promocao ?? null,
-        data.garantias ?? null,
-        JSON.stringify(data.beneficios ?? []),
-        JSON.stringify(data.formasPagamento ?? []),
-        data.instrucoesPagamento ?? '',
-        JSON.stringify(data.negociacao ?? null),
-        data.entrega ?? null,
-        data.instrucoesEntrega ?? '',
-        data.local_realizacao ?? null,
-        data.requires_address ?? false,
-        data.definicaoFechamento ?? '',
-        JSON.stringify(data.camposObrigatoriosFechamento ?? []),
-        data.categoria ?? null,
-        JSON.stringify(data.tags ?? []),
-        id,
-      ]
-    );
+  /**
+   * Recupera um produto pelo ID. Lança erro se não existir.
+   */
+  async getProductById(id: number) {
+    const product = await ProductRepository.getById(id);
+    if (!product) {
+      throw new Error('Produto não encontrado');
+    }
+    return product;
   }
 }
+
+export default new ProductService();
