@@ -7,8 +7,14 @@ import path from "path";
 import dotenv from "dotenv";
 import { fileURLToPath } from "url";
 
-// ✅ Recria __dirname (ESM compatibility)
-const __filename = fileURLToPath(import.meta.url);
+// 🔍 Detecta se está rodando dentro do Jest
+const isJest = process.env.JEST_WORKER_ID !== undefined;
+
+// ✅ Recria __dirname de forma compatível com Jest + Node ESM
+const __filename = isJest
+  ? path.resolve("src/server/config/env.server.ts") // caminho genérico
+  : fileURLToPath(import.meta.url);
+
 const __dirname = path.dirname(__filename);
 
 // ✅ Carrega variáveis do .env.server localizado na raiz do monorepo

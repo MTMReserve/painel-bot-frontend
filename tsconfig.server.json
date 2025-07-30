@@ -7,7 +7,7 @@
       "@server/*": ["*"]
     },
     "target": "ES2022",
-    "module": "ESNext",
+    "module": "ES2022",
     "strict": true,
     "moduleResolution": "node",
     "esModuleInterop": true,

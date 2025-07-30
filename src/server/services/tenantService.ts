@@ -17,23 +17,26 @@ export async function getTenantProfile(tenant_id: string) {
   const tenant = await findTenantById(tenant_id);
   if (!tenant) throw new Error("Tenant não encontrado");
 
-  return {
-    tenant_id: tenant.tenant_id,
-    nome_empresa: tenant.nome_empresa,
-    logo_url: tenant.logo_url || undefined,
-    plano: tenant.plano || "mensal",
-    aceitou_termos_em: tenant.aceitou_termos_em || undefined,
-    termo_versao: tenant.termo_versao || undefined,
-    email: tenant.email || undefined,
-    telefone: tenant.telefone || undefined,
-    cep: tenant.cep,
-    numero: tenant.numero,
-    complemento: tenant.complemento || "",
-    cidade: tenant.cidade,
-    estado: tenant.estado,
-    logradouro: tenant.logradouro,
-    bairro: tenant.bairro || "",
-  };
+return {
+  tenant_id: tenant.tenant_id,
+  nome_empresa: tenant.nome_empresa,
+  nome_completo: tenant.nome_completo || "", // ✅ Adicionado
+  cpf: tenant.cpf || "",                     // ✅ Adicionado
+  logo_url: tenant.logo_url || undefined,
+  plano: tenant.plano || "mensal",
+  aceitou_termos_em: tenant.aceitou_termos_em || undefined,
+  termo_versao: tenant.termo_versao || undefined,
+  email: tenant.email || undefined,
+  telefone: tenant.telefone || undefined,
+  cep: tenant.cep,
+  numero: tenant.numero,
+  complemento: tenant.complemento || "",
+  cidade: tenant.cidade,
+  estado: tenant.estado,
+  logradouro: tenant.logradouro,
+  bairro: tenant.bairro || "",
+};
+
 }
 
 // Atualiza plano do tenant
@@ -46,22 +49,35 @@ export async function updateNomeEmpresa(tenant_id: string, nome_empresa: string)
   await updateTenantNomeEmpresa(tenant_id, nome_empresa);
 }
 
-// ✅ NOVO: Atualiza todos os campos do perfil
+// ✅ NOVO: Atualiza todos os campos válidos do perfil
 export async function updateTenantProfile(
   tenant_id: string,
   data: {
     nome_empresa: string;
-    logo_url: string | null;
+    logo_url?: string | null;
     cep: string;
     numero: string;
-    complemento: string | null;
+    complemento?: string | null;
     cidade: string;
     estado: string;
     logradouro: string;
-    bairro: string | null;
+    bairro?: string | null;
   }
 ) {
-  await updateTenantProfileRepo(tenant_id, data);
+  // Sanitização extra de segurança — impede campos proibidos
+  const camposSanitizados = {
+    nome_empresa: data.nome_empresa,
+    logo_url: data.logo_url ?? null,
+    cep: data.cep,
+    numero: data.numero,
+    complemento: data.complemento ?? null,
+    cidade: data.cidade,
+    estado: data.estado,
+    logradouro: data.logradouro,
+    bairro: data.bairro ?? null,
+  };
+
+  await updateTenantProfileRepo(tenant_id, camposSanitizados);
 }
 
 // Busca termo ativo mais recente

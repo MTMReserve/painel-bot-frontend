@@ -1,64 +1,144 @@
-// ================================
-// File: src/client/pages/TenantProfile.tsx
-// ================================
+//=============================================
+// src/client/pages/TenantProfile.tsx
+//=============================================
 
 import { useEffect, useState } from "react";
 import { useTenantProfile } from "../hooks/useTenantProfile";
 import { useUpdateTenant } from "../hooks/useUpdateTenant";
+import EnderecoForm from "../components/EnderecoForm";
+import type { TenantProfileResponse } from "../types/TenantProfileResponse";
+
+
+
 
 export default function TenantProfile() {
-  const { tenant, isLoading } = useTenantProfile();
+const { tenant, isLoading } = useTenantProfile();
+const tenantTyped = tenant as TenantProfileResponse;
+
+
   const { updateTenant, isUpdating } = useUpdateTenant();
 
-  // Estado do formulário com campos editáveis
   const [formData, setFormData] = useState({
     nome_empresa: "",
     logo_url: "",
+    telefone: "",
+    email: "",
   });
+
+  const [endereco, setEndereco] = useState({
+    cep: "",
+    numero: "",
+    complemento: "",
+    logradouro: "",
+    bairro: "",
+    cidade: "",
+    estado: "",
+  });
+
   const [isDirty, setIsDirty] = useState(false);
   const [edicaoHabilitada, setEdicaoHabilitada] = useState(true);
-
-  // Estado para toast simples
   const [toastMessage, setToastMessage] = useState("");
   const [toastVisible, setToastVisible] = useState(false);
 
-  // Carrega dados iniciais do tenant
-  useEffect(() => {
-    if (tenant) {
-      setFormData({
-        nome_empresa: tenant.nome_empresa ?? "",
-        logo_url: tenant.logo_url ?? "",
-      });
-    }
-  }, [tenant]);
+useEffect(() => {
+  if (!tenant) return;
 
-  // Desabilita edição após 10 minutos
+  // Checa se os dados já estão preenchidos para evitar re-execução
+  const formDataIgual =
+    formData.nome_empresa === (tenant.nome_empresa ?? "") &&
+    formData.logo_url === (tenant.logo_url ?? "") &&
+    formData.telefone === (tenant.telefone ?? "") &&
+    formData.email === (tenant.email ?? "");
+
+  const enderecoIgual =
+    endereco.cep === (tenant.cep ?? "") &&
+    endereco.numero === (tenant.numero ?? "") &&
+    endereco.complemento === (tenant.complemento ?? "") &&
+    endereco.logradouro === (tenant.logradouro ?? "") &&
+    endereco.bairro === (tenant.bairro ?? "") &&
+    endereco.cidade === (tenant.cidade ?? "") &&
+    endereco.estado === (tenant.estado ?? "");
+
+  if (!formDataIgual) {
+    setFormData({
+      nome_empresa: tenant.nome_empresa ?? "",
+      logo_url: tenant.logo_url ?? "",
+      telefone: tenant.telefone ?? "",
+      email: tenant.email ?? "",
+    });
+  }
+
+  if (!enderecoIgual) {
+    setEndereco({
+      cep: tenant.cep ?? "",
+      numero: tenant.numero ?? "",
+      complemento: tenant.complemento ?? "",
+      logradouro: tenant.logradouro ?? "",
+      bairro: tenant.bairro ?? "",
+      cidade: tenant.cidade ?? "",
+      estado: tenant.estado ?? "",
+    });
+  }
+
+  // Opcional: Limpa flag dirty só se dados vieram novos
+  if (!formDataIgual && !enderecoIgual) {
+    setIsDirty(false);
+  }
+  }, [
+    tenant,
+    formData.nome_empresa,
+    formData.logo_url,
+    formData.telefone,
+    formData.email,
+    endereco.cep,
+    endereco.numero,
+    endereco.complemento,
+    endereco.logradouro,
+    endereco.bairro,
+    endereco.cidade,
+    endereco.estado,
+  ]);
+
+  // Timer de segurança (10 min)
   useEffect(() => {
     const timer = setTimeout(() => setEdicaoHabilitada(false), 10 * 60 * 1000);
     return () => clearTimeout(timer);
   }, []);
 
-  function handleChange(
-    e: React.ChangeEvent<HTMLInputElement>
-  ) {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     setIsDirty(true);
-  }
+  };
 
-  function handleSubmit(e: React.FormEvent) {
+  const handleEnderecoChange = (novoEndereco: typeof endereco) => {
+    setEndereco(novoEndereco);
+    setIsDirty(true);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    updateTenant(
-  {
-    nome_empresa: formData.nome_empresa,
-    logo_url: formData.logo_url,
-    cep: "",
-    numero: "",
-    logradouro: "",
-    cidade: "",
-    estado: "",
-  },
 
+    const camposObrigatorios = [
+      formData.nome_empresa,
+      endereco.cep,
+      endereco.numero,
+      endereco.cidade,
+      endereco.estado,
+    ];
+
+    if (camposObrigatorios.some((c) => !c || c.trim() === "")) {
+      setToastMessage("Preencha todos os campos obrigatórios.");
+      setToastVisible(true);
+      setTimeout(() => setToastVisible(false), 3000);
+      return;
+    }
+
+    updateTenant(
+      {
+        ...formData,
+        ...endereco,
+      },
       {
         onSuccess: () => {
           setToastMessage("Dados salvos com sucesso!");
@@ -73,11 +153,12 @@ export default function TenantProfile() {
         },
       }
     );
-  }
+  };
 
   if (isLoading) {
     return <p className="p-4 text-gray-600">Carregando dados da empresa...</p>;
   }
+
   if (!tenant) {
     return <p className="p-4 text-red-500">Erro ao carregar perfil da empresa.</p>;
   }
@@ -89,12 +170,12 @@ export default function TenantProfile() {
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Nome da Empresa */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">Nome da Empresa</label>
+          <label className="block text-sm font-medium text-gray-700">Nome da Empresa*</label>
           <input
             type="text"
             name="nome_empresa"
             value={formData.nome_empresa}
-            onChange={handleChange}
+            onChange={handleInputChange}
             disabled={!edicaoHabilitada || isUpdating}
             className="w-full border rounded p-2 disabled:bg-gray-100"
           />
@@ -107,12 +188,64 @@ export default function TenantProfile() {
             type="url"
             name="logo_url"
             value={formData.logo_url}
-            onChange={handleChange}
+            onChange={handleInputChange}
             disabled={!edicaoHabilitada || isUpdating}
-            placeholder="https://..."
             className="w-full border rounded p-2 disabled:bg-gray-100"
           />
         </div>
+
+        {/* Telefone */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Telefone</label>
+          <input
+            type="text"
+            name="telefone"
+            value={formData.telefone}
+            onChange={handleInputChange}
+            disabled={!edicaoHabilitada || isUpdating}
+            className="w-full border rounded p-2 disabled:bg-gray-100"
+          />
+        </div>
+
+        {/* Email */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Email</label>
+          <input
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleInputChange}
+            disabled={!edicaoHabilitada || isUpdating}
+            className="w-full border rounded p-2 disabled:bg-gray-100"
+          />
+        </div>
+
+        {/* Nome completo do contratante */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Nome completo do responsável*</label>
+          <input
+            type="text"
+            value={tenantTyped.nome_completo || ""}
+            disabled
+            className="w-full border rounded p-2 bg-gray-100"
+          />
+        </div>
+
+        {/* CPF */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">CPF*</label>
+          <input
+            type="text"
+            value={tenantTyped.cpf || ""}
+
+            disabled
+            className="w-full border rounded p-2 bg-gray-100"
+          />
+        </div>
+
+
+        {/* Endereço */}
+        <EnderecoForm initialValue={endereco} onChange={handleEnderecoChange} />
 
         {/* Campos somente leitura */}
         <div>
@@ -124,29 +257,10 @@ export default function TenantProfile() {
             className="w-full border rounded p-2 bg-gray-100 text-gray-500"
           />
         </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700">E-mail</label>
-          <input
-            type="email"
-            value={tenant.email}
-            disabled
-            className="w-full border rounded p-2 bg-gray-100 text-gray-500"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Telefone</label>
-          <input
-            type="text"
-            value={tenant.telefone}
-            disabled
-            className="w-full border rounded p-2 bg-gray-100 text-gray-500"
-          />
-        </div>
-
-        {/* Data do termo */}
-        <div className="text-sm text-gray-500">
+        <div className="text-sm text-gray-500 mt-4">
           <p>
-            Termo aceito em: {tenant.aceitou_termos_em
+            Termo aceito em:{" "}
+            {tenant.aceitou_termos_em
               ? new Date(tenant.aceitou_termos_em).toLocaleString("pt-BR", {
                   day: "2-digit",
                   month: "2-digit",
@@ -156,8 +270,18 @@ export default function TenantProfile() {
                 })
               : "Ainda não aceito"}
           </p>
-          <p>Versão do termo: {tenant.termo_versao || "N/A"}</p>
+          <p>
+            <a
+              href={`/docs/termos/termo-${tenant.termo_versao || "v1.0"}.md`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-green-600 underline"
+            >
+              Visualizar termo aceito (versão {tenant.termo_versao || "N/A"})
+            </a>
+          </p>
         </div>
+
 
         {/* Aviso de expiração */}
         {!edicaoHabilitada && (

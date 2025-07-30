@@ -4,6 +4,8 @@
 export interface TenantProfileResponse {
   tenant_id: string;
   nome_empresa: string;
+  nome_completo: string; 
+  cpf: string;           
   email?: string;
   telefone?: string;
   plano?: string;
@@ -13,8 +15,10 @@ export interface TenantProfileResponse {
 
   cep: string;
   logradouro: string;
+  bairro: string;
   numero: string;
   complemento?: string;
   cidade: string;
   estado: string;
 }
+

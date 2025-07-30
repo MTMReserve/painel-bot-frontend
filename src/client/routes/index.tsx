@@ -21,6 +21,9 @@ import Contrato from "@client/pages/Contrato";
 import LoginCallback from "../pages/LoginCallback";
 import LoginError from "../pages/LoginError";
 import Termos from "../pages/Termos";
+import TesteEndereco from "../pages/TesteEndereco";
+import ProductFormPage from "@client/pages/ProductFormPage";
+
 
 export default function AppRoutes() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated());
@@ -33,6 +36,7 @@ export default function AppRoutes() {
         <Route path="/login-callback" element={<LoginCallback />} />
 
         {/* Rotas públicas que só podem ser acessadas se NÃO estiver logado */}
+        <Route path="/teste-endereco" element={<TesteEndereco />} />
         <Route
           path="/login"
           element={
@@ -91,6 +95,8 @@ export default function AppRoutes() {
           <Route path="/produtos" element={<ProductsPage />} />
           <Route path="/perfil" element={<TenantProfile />} />
           <Route path="/contrato" element={<Contrato />} />
+          <Route path="/products/new" element={<ProductFormPage />} />
+          <Route path="/products/:id/edit" element={<ProductFormPage />} />
         </Route>
 
         {/* Redirecionamento padrão */}

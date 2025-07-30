@@ -10,6 +10,7 @@ import authRouter from "./routes/auth.routes";
 import { tenantRouter } from "./routes/tenant.routes";
 import { BACK_ENV } from "./config/env.server";
 import session from "cookie-session";
+import productsRoutes from "./routes/products.routes";
 
 const app = express();
 
@@ -35,6 +36,8 @@ app.use("/stats", statsRouter);
 app.use("/clients", clientsRouter);
 app.use("/auth", authRouter);
 app.use(tenantRouter);
+app.use("/products", productsRoutes);
+
 
 app.listen(BACK_ENV.PORT, () => {
   console.log(`[PAINEL API] ✅ Rodando em http://localhost:${BACK_ENV.PORT}`);

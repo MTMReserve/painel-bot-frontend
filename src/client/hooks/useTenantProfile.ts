@@ -8,20 +8,22 @@ import { useTenantStore } from "../store/useTenantStore";
 import type { TenantProfileResponse } from "../types/TenantProfileResponse";
 
 export function useTenantProfile() {
-  const { setTenant } = useTenantStore();
+  const { tenant, setTenant } = useTenantStore();
 
-  const { data, isLoading, isError } = useQuery<TenantProfileResponse>({
+  useQuery<TenantProfileResponse>({
     queryKey: ["tenantProfile"],
     queryFn: async () => {
-      const response = await api.get<TenantProfileResponse>("/tenant/me");
-      setTenant(response.data); // salva no Zustand
+      const response = await api.get("/tenant/me");
+      setTenant(response.data); // ✅ Salva uma única vez no Zustand
       return response.data;
-    }
+    },
+    staleTime: 5 * 60 * 1000, // ✅ evita revalidação constante
+    refetchOnWindowFocus: false, // ✅ impede re-busca automática ao focar a aba
   });
 
   return {
-    tenant: data,
-    isLoading,
-    isError
+    tenant,              // ✅ usa Zustand, objeto estável
+    isLoading: !tenant,  // ✅ carrega até Zustand ter dados
+    isError: false,      // pode ser ajustado se quiser tratar erro real
   };
 }

@@ -1,12 +1,17 @@
+//===========================================
+//src/server/controllers/tenantController.ts
+//===========================================
+
 import { type RequestHandler } from "express";
 import {
   getTenantProfile,
   updatePlano,
   getTermoAtual,
   registrarAceite,
-  updateNomeEmpresa
+  updateTenantProfile 
 } from "../services/tenantService";
 import type { AuthenticatedRequest } from "../types/Express";
+import { tenantProfileUpdateSchema } from "../schemas/tenantProfileSchema"; // ✅ Importação do novo schema
 
 // ✅ GET /tenant/me — retorna perfil completo
 export const getTenantProfileHandler: RequestHandler = async (req, res) => {
@@ -15,16 +20,19 @@ export const getTenantProfileHandler: RequestHandler = async (req, res) => {
   return res.json(perfil);
 };
 
-// ✅ PUT /tenant/me — atualiza apenas o nome da empresa (novo)
+// ✅ PUT /tenant/me — atualiza o perfil do tenant (completo)
 export const updateTenantProfileHandler: RequestHandler = async (req, res) => {
   const { tenant_id } = req as AuthenticatedRequest;
-  const { nome_empresa } = req.body;
 
-  if (!nome_empresa || typeof nome_empresa !== "string" || nome_empresa.trim().length < 2) {
-    return res.status(400).json({ error: "Nome da empresa inválido" });
+  const parseResult = tenantProfileUpdateSchema.safeParse(req.body);
+  if (!parseResult.success) {
+    return res.status(400).json({
+      error: "Dados inválidos",
+      detalhes: parseResult.error.flatten(),
+    });
   }
 
-  await updateNomeEmpresa(tenant_id, nome_empresa.trim());
+  await updateTenantProfile(tenant_id, parseResult.data);
   return res.status(204).send();
 };
 
